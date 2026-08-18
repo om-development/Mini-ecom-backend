@@ -4,6 +4,8 @@ import {
   deleteProduct,
   createProduct,
   updateProduct,
+  getCategories,
+  getProductById,
 } from "../controllers/productController.js";
 import { get } from "mongoose";
 
@@ -25,4 +27,11 @@ router.delete("/delete/:id", deleteProduct);
 
 router.put("/update/:id", updateProduct);
 
+// To get categories
+
+router.get("/categories", getCategories);
+
+// To get product by id
+
+router.get("/:id", getProductById);
 export default router;

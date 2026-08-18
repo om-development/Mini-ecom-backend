@@ -15,35 +15,126 @@ export const createProduct = async (req, res) => {
 
 // Getting products
 
-export const getProducts = async (req, res) => {
-  try {
-    const products = await Product.find().sort({ createdAt: -1 });
-    res.json({ products });
-  } catch (err) {
-    res.status(500).json({ message: "Error while getting Products", err });
-  }
-};
+// export const getProducts = async (req, res) => {
+//   try {
+//     const products = await Product.find().sort({ createdAt: -1 });
+//     res.json({ products });
+//   } catch (err) {
+//     res.status(500).json({ message: "Error while getting Products", err });
+//   }
+// };
 
 // Updatig a product
 
 export const updateProduct = async (req, res) => {
   try {
     const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: "after",
     });
     res.json({ message: "Product Updated Successfully", updated });
   } catch (err) {
     res.status(500).json({ message: "Error while updating the product", err });
   }
 };
+export const getProducts = async (req, res) => {
+  try {
+    const { search, category } = req.query;
 
-// Deleting a product
+    // Build filter object
+    let filter = {};
+
+    // Search filter - search in title and description
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { category: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Category filter
+    if (category && category !== "All Categories") {
+      filter.category = category;
+    }
+
+    // Fetch filtered products
+    const products = await Product.find(filter).sort({ createdAt: -1 });
+
+    res.json({
+      products,
+      total: products.length,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error while getting Products", err });
+  }
+};
+
+export const getCategories = async (req, res) => {
+  try {
+    const categories = await Product.distinct("category");
+
+    // Sort categories alphabetically
+    const sortedCategories = categories.sort((a, b) => a.localeCompare(b));
+
+    res.json({ categories: sortedCategories });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error while fetching categories",
+      error: error.message,
+    });
+  }
+};
+
+// NEW: Combined endpoint for initial load
+export const getProductsWithCategories = async (req, res) => {
+  try {
+    const [products, categories] = await Promise.all([
+      Product.find().sort({ createdAt: -1 }),
+      Product.distinct("category"),
+    ]);
+
+    const sortedCategories = categories.sort((a, b) => a.localeCompare(b));
+
+    res.json({
+      products,
+      categories: sortedCategories,
+      total: products.length,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error while fetching products and categories",
+      error: error.message,
+    });
+  }
+};
 
 export const deleteProduct = async (req, res) => {
   try {
-    await Product.findByIdAndDelete(req.params.id);
-    res.json({ message: "Product deleted successfully" });
+    const { id } = req.params;
+
+    const product = await Product.findByIdAndDelete(id);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json({
+      message: "Product deleted successfully",
+      product,
+    });
   } catch (err) {
-    res.status(500).json({ message: "Error While Deleting", err });
+    res.status(500).json({
+      message: "Error while deleting product",
+      err,
+    });
   }
+};
+
+export const getProductById = async (req, res) => {
+  const { id } = req.params;
+  const product = await Product.findById(id);
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+  res.json({ product });
 };
