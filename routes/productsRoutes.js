@@ -7,31 +7,20 @@ import {
   getCategories,
   getProductById,
 } from "../controllers/productController.js";
+import authMiddleware from "../middleware/authMiddleware.js";
+import adminMiddleware from "../middleware/adminMiddleware.js";
 
 
 const router = express.Router();
 
-// To create new product
-
-router.post("/add", createProduct);
-
-// To get products
-
+// Public routes
 router.get("/", getProducts);
-
-// To delete products
-
-router.delete("/delete/:id", deleteProduct);
-
-// To update product
-
-router.put("/update/:id", updateProduct);
-
-// To get categories
-
 router.get("/categories", getCategories);
+router.get("/:id", getProductById);
 
-// To get product by id
+// Admin only routes
+router.post("/add", authMiddleware, adminMiddleware, createProduct);
+router.delete("/delete/:id", authMiddleware, adminMiddleware, deleteProduct);
+router.put("/update/:id", authMiddleware, adminMiddleware, updateProduct);
 
-router.get("/:id", getProductById);  
 export default router;

@@ -1,9 +1,10 @@
 import express from "express";
 import { saveAddress, getAddress, setAddressActive } from "../controllers/addressController.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/add", saveAddress);
-router.get("/:userId", getAddress);
-router.post("/set-active", setAddressActive);
+router.post("/add", authMiddleware, saveAddress);
+router.get("/:userId", authMiddleware, getAddress);
+router.post("/set-active", authMiddleware, setAddressActive);
 export default router;

@@ -37,6 +37,17 @@ export const signupUser = async (req, res) => {
 
 export default signupUser;
 
+// Logout Controller
+
+export const logoutUser = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+  });
+  res.json({ message: "Logged out successfully" });
+};
+
 // Login Controller
 
 export const loginUser = async (req, res) => {
