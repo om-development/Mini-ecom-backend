@@ -14,6 +14,7 @@ const OrderSchema = new mongoose.Schema(
           required: true,
           ref: "Product",
         },
+        title: String,
         quantity: Number,
         price: Number,
       },
@@ -29,9 +30,11 @@ const OrderSchema = new mongoose.Schema(
       pincode: String,
     },
     totalAmount: Number,
+    subtotal: Number,
+    tax: Number,
     paymentMethod: {
       type: String,
-      default: "Cod",
+      default: "cod",
     },
     status: {
       type: String,

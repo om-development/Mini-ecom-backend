@@ -10,6 +10,6 @@ const router = express.Router();
 
 router.post("/place", authMiddleware, placeOrder);
 router.get("/:orderId", authMiddleware, getOrder);
-router.get("/user/:userId", authMiddleware, getUserOrders);
+router.get("/user/me", authMiddleware, getUserOrders);
 
 export default router;

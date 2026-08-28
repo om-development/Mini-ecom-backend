@@ -4,12 +4,13 @@ import Product from "../models/Product.js";
 
 export const placeOrder = async (req, res) => {
   try {
-    const { userId, address, paymentMethod } = req.body;
+    const userId = req.user.id;
+    const { address, paymentMethod } = req.body;
 
     // Validate required fields
-    if (!userId || !address) {
+    if (!address) {
       return res.status(400).json({ 
-        message: "User ID and Address are required" 
+        message: "Address is required" 
       });
     }
 
@@ -66,8 +67,7 @@ export const placeOrder = async (req, res) => {
       tax,
       totalAmount,
       paymentMethod: paymentMethod || "cod",
-      status: "pending",
-      createdAt: new Date(),
+      status: "Placed",
     });
 
     // Clear cart
@@ -96,7 +96,7 @@ export const getOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    const order = await Order.findById(orderId);
+    const order = await Order.findOne({ _id: orderId, userId: req.user.id });
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
@@ -118,7 +118,7 @@ export const getOrder = async (req, res) => {
 /// Get all orders for a user
 export const getUserOrders = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id;
 
     const orders = await Order.find({ userId })
       .sort({ createdAt: -1 });

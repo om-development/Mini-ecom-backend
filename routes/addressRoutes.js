@@ -5,6 +5,6 @@ import authMiddleware from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 router.post("/add", authMiddleware, saveAddress);
-router.get("/:userId", authMiddleware, getAddress);
+router.get("/", authMiddleware, getAddress);
 router.post("/set-active", authMiddleware, setAddressActive);
 export default router;

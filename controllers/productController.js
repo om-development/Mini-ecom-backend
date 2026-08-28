@@ -131,10 +131,14 @@ export const deleteProduct = async (req, res) => {
 };
 
 export const getProductById = async (req, res) => {
-  const { id } = req.params;
-  const product = await Product.findById(id);
-  if (!product) {
-    return res.status(404).json({ message: "Product not found" });
+  try {
+    const { id } = req.params;
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    res.json({ product });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching product", error: err.message });
   }
-  res.json({ product });
 };

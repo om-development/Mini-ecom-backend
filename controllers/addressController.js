@@ -2,7 +2,8 @@ import Address from "../models/Address.js";
 
 export const saveAddress = async (req, res) => {
   try {
-    const { userId, fullName, phone, addressLine, district, province, pincode } = req.body;
+    const userId = req.user.id;
+    const { fullName, phone, addressLine, district, province, pincode } = req.body;
 
     // Check if address already exists
     const existingAddress = await Address.findOne({
@@ -30,7 +31,13 @@ export const saveAddress = async (req, res) => {
 
     // Create new address with active: true
     const address = await Address.create({
-      ...req.body,
+      userId,
+      fullName,
+      phone,
+      addressLine,
+      district,
+      province,
+      pincode,
       active: true,
     });
 
@@ -42,7 +49,7 @@ export const saveAddress = async (req, res) => {
 
 export const getAddress = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id;
 
     const addresses = await Address.find({ userId });
 
@@ -76,7 +83,8 @@ export const getAddress = async (req, res) => {
 // Set an address as active
 export const setAddressActive = async (req, res) => {
   try {
-    const { userId, addressId } = req.body;
+    const userId = req.user.id;
+    const { addressId } = req.body;
 
     // Deactivate all other addresses for this user
     await Address.updateMany(
