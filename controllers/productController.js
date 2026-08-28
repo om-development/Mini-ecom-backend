@@ -51,6 +51,9 @@ export const updateProduct = async (req, res) => {
 export const getProducts = async (req, res) => {
   try {
     const { search, category } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    const skip = (page - 1) * limit;
 
     // Build filter object
     let filter = {};
@@ -70,12 +73,17 @@ export const getProducts = async (req, res) => {
       filter.category = category;
     }
 
-    // Fetch filtered products
-    const products = await Product.find(filter).sort({ createdAt: -1 });
+    // Fetch filtered products with pagination
+    const [products, total] = await Promise.all([
+      Product.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Product.countDocuments(filter),
+    ]);
 
     res.json({
       products,
-      total: products.length,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (err) {
     res.status(500).json({ message: "Error while getting Products", err });

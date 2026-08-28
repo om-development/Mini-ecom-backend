@@ -118,11 +118,24 @@ export const getOrder = async (req, res) => {
   }
 };
 
-// Admin: get all orders
+// Admin: get all orders with pagination
 export const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 });
-    res.json({ orders });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const [orders, total] = await Promise.all([
+      Order.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Order.countDocuments(),
+    ]);
+
+    res.json({
+      orders,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (err) {
     console.error("Error getting all orders:", err);
     res.status(500).json({ message: "Error while fetching orders" });
@@ -147,21 +160,29 @@ export const updateOrderStatus = async (req, res) => {
   }
 };
 
-/// Get all orders for a user
+// Get orders for a user with pagination
 export const getUserOrders = async (req, res) => {
   try {
     const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
-    const orders = await Order.find({ userId })
-      .sort({ createdAt: -1 });
+    const [orders, total] = await Promise.all([
+      Order.find({ userId }).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Order.countDocuments({ userId }),
+    ]);
 
-    res.json({ 
+    res.json({
       message: "Orders fetched successfully",
-      orders 
+      orders,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (err) {
     console.error("Error getting orders:", err);
-    res.status(500).json({ 
+    res.status(500).json({
       message: "Error while fetching orders",
     });
   }
