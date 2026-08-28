@@ -82,6 +82,29 @@ export const getProducts = async (req, res) => {
   }
 };
 
+// Admin: get all products with pagination
+export const getAllProducts = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const [products, total] = await Promise.all([
+      Product.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Product.countDocuments(),
+    ]);
+
+    res.json({
+      products,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error while getting products" });
+  }
+};
+
 export const getCategories = async (req, res) => {
   try {
     const categories = await Product.distinct("category");

@@ -43,8 +43,6 @@ export const signupUser = async (req, res) => {
   }
 };
 
-export default signupUser;
-
 // Logout Controller
 
 export const logoutUser = (req, res) => {

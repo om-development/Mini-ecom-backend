@@ -19,6 +19,12 @@ export const addToCart = async (req, res) => {
           },
         ],
       });
+      await cart.save();
+      res.status(200).json({
+        message: "Item added to cart",
+        cart,
+      });
+      return;
     } else {
       // Check if product already exists in cart
       const item = cart.items.find(

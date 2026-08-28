@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getProducts,
+  getAllProducts,
   deleteProduct,
   createProduct,
   updateProduct,
@@ -13,14 +14,15 @@ import adminMiddleware from "../middleware/adminMiddleware.js";
 
 const router = express.Router();
 
-// Public routes
-router.get("/", getProducts);
-router.get("/categories", getCategories);
-router.get("/:id", getProductById);
-
-// Admin only routes
+// Admin only routes (must come before /:id to avoid route conflicts)
+router.get("/all", authMiddleware, adminMiddleware, getAllProducts);
 router.post("/add", authMiddleware, adminMiddleware, createProduct);
 router.delete("/delete/:id", authMiddleware, adminMiddleware, deleteProduct);
 router.put("/update/:id", authMiddleware, adminMiddleware, updateProduct);
+
+// Public routes
+router.get("/categories", getCategories);
+router.get("/", getProducts);
+router.get("/:id", getProductById);
 
 export default router;
