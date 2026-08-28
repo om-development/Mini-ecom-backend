@@ -90,16 +90,32 @@ export const getProducts = async (req, res) => {
   }
 };
 
-// Admin: get all products with pagination
+// Admin: get all products with pagination, search, and category filter
 export const getAllProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
+    const { search, category } = req.query;
+
+    let filter = {};
+
+    if (search) {
+      const safeSearch = escapeRegex(search);
+      filter.$or = [
+        { title: { $regex: safeSearch, $options: "i" } },
+        { description: { $regex: safeSearch, $options: "i" } },
+        { category: { $regex: safeSearch, $options: "i" } },
+      ];
+    }
+
+    if (category && category !== "All") {
+      filter.category = category;
+    }
 
     const [products, total] = await Promise.all([
-      Product.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
-      Product.countDocuments(),
+      Product.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Product.countDocuments(filter),
     ]);
 
     res.json({
