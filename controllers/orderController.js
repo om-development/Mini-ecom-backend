@@ -95,7 +95,11 @@ export const getOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    const order = await Order.findOne({ _id: orderId, userId: req.user.id });
+    const query = { _id: orderId };
+    if (req.user.role !== "admin") {
+      query.userId = req.user.id;
+    }
+    const order = await Order.findOne(query);
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
