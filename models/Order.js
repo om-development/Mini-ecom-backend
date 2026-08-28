@@ -15,6 +15,7 @@ const OrderSchema = new mongoose.Schema(
           ref: "Product",
         },
         title: String,
+        image: String,
         quantity: Number,
         price: Number,
       },
