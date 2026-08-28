@@ -1,15 +1,27 @@
 import Product from "../models/Product.js";
 
+const escapeRegex = (text) => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+
 // Creating a new Product
 
 export const createProduct = async (req, res) => {
   try {
+    const { title, description, price, category, image, stock } = req.body;
+
+    if (!title || !description || price == null || !category || !image || stock == null) {
+      return res.status(400).json({ message: "All fields are required: title, description, price, category, image, stock" });
+    }
+
+    if (price < 0 || stock < 0) {
+      return res.status(400).json({ message: "Price and stock must be non-negative" });
+    }
+
     const product = await Product.create(req.body);
     res.json({ message: "Product Created Successfully", product });
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Something went wrong while uploading product", error });
+      .json({ message: "Something went wrong while uploading product" });
   }
 };
 
@@ -33,7 +45,7 @@ export const updateProduct = async (req, res) => {
     });
     res.json({ message: "Product Updated Successfully", updated });
   } catch (err) {
-    res.status(500).json({ message: "Error while updating the product", err });
+    res.status(500).json({ message: "Error while updating the product" });
   }
 };
 export const getProducts = async (req, res) => {
@@ -45,10 +57,11 @@ export const getProducts = async (req, res) => {
 
     // Search filter - search in title and description
     if (search) {
+      const safeSearch = escapeRegex(search);
       filter.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-        { category: { $regex: search, $options: "i" } },
+        { title: { $regex: safeSearch, $options: "i" } },
+        { description: { $regex: safeSearch, $options: "i" } },
+        { category: { $regex: safeSearch, $options: "i" } },
       ];
     }
 
@@ -80,7 +93,6 @@ export const getCategories = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Error while fetching categories",
-      error: error.message,
     });
   }
 };
@@ -125,7 +137,6 @@ export const deleteProduct = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       message: "Error while deleting product",
-      err,
     });
   }
 };
@@ -139,6 +150,6 @@ export const getProductById = async (req, res) => {
     }
     res.json({ product });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching product", error: err.message });
+    res.status(500).json({ message: "Error fetching product" });
   }
 };

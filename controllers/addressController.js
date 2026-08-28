@@ -5,6 +5,10 @@ export const saveAddress = async (req, res) => {
     const userId = req.user.id;
     const { fullName, phone, addressLine, district, province, pincode } = req.body;
 
+    if (!fullName || !phone || !addressLine || !district || !province || !pincode) {
+      return res.status(400).json({ message: "All address fields are required" });
+    }
+
     // Check if address already exists
     const existingAddress = await Address.findOne({
       userId,
@@ -43,7 +47,7 @@ export const saveAddress = async (req, res) => {
 
     res.json({ message: "Address saved successfully", address });
   } catch (err) {
-    res.status(500).json({ message: "Error while saving address", err });
+    res.status(500).json({ message: "Error while saving address" });
   }
 };
 
@@ -76,7 +80,7 @@ export const getAddress = async (req, res) => {
       address: addresses 
     });
   } catch (err) {
-    res.status(500).json({ message: "Error while getting address", err });
+    res.status(500).json({ message: "Error while getting address" });
   }
 };
 
@@ -105,6 +109,6 @@ export const setAddressActive = async (req, res) => {
 
     res.json({ message: "Address set as active", address });
   } catch (err) {
-    res.status(500).json({ message: "Error while setting address active", err });
+    res.status(500).json({ message: "Error while setting address active" });
   }
 };

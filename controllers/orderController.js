@@ -85,8 +85,7 @@ export const placeOrder = async (req, res) => {
   } catch (err) {
     console.error("Error placing order:", err);
     res.status(500).json({ 
-      message: "Error while placing order", 
-      error: err.message 
+      message: "Error while placing order",
     });
   }
 };
@@ -110,7 +109,6 @@ export const getOrder = async (req, res) => {
     console.error("Error getting order:", err);
     res.status(500).json({ 
       message: "Error while fetching order",
-      error: err.message 
     });
   }
 };
@@ -131,7 +129,6 @@ export const getUserOrders = async (req, res) => {
     console.error("Error getting orders:", err);
     res.status(500).json({ 
       message: "Error while fetching orders",
-      error: err.message 
     });
   }
 };

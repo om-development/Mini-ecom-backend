@@ -48,7 +48,6 @@ export const addToCart = async (req, res) => {
 
     res.status(500).json({
       message: "Error while adding item to cart",
-      error: err.message,
     });
   }
 };
@@ -92,7 +91,6 @@ export const removeItem = async (req, res) => {
 
     res.status(500).json({
       message: "Error while removing item from cart",
-      error: err.message,
     });
   }
 };
@@ -140,7 +138,6 @@ export const updateQuantity = async (req, res) => {
 
     res.status(500).json({
       message: "Error while updating quantity",
-      error: err.message,
     });
   }
 };
@@ -168,7 +165,6 @@ export const getCart = async (req, res) => {
 
     res.status(500).json({
       message: "Error while getting cart",
-      error: err.message,
     });
   }
 };
