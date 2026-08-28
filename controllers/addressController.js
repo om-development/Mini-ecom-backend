@@ -1,0 +1,102 @@
+import Address from "../models/Address.js";
+
+export const saveAddress = async (req, res) => {
+  try {
+    const { userId, fullName, phone, addressLine, district, province, pincode } = req.body;
+
+    // Check if address already exists
+    const existingAddress = await Address.findOne({
+      userId,
+      fullName,
+      phone,
+      addressLine,
+      district,
+      province,
+      pincode,
+    });
+
+    if (existingAddress) {
+      return res.status(400).json({ 
+        message: "This address already exists",
+        address: existingAddress 
+      });
+    }
+
+    // Deactivate all previous addresses for this user
+    await Address.updateMany(
+      { userId },
+      { active: false }
+    );
+
+    // Create new address with active: true
+    const address = await Address.create({
+      ...req.body,
+      active: true,
+    });
+
+    res.json({ message: "Address saved successfully", address });
+  } catch (err) {
+    res.status(500).json({ message: "Error while saving address", err });
+  }
+};
+
+export const getAddress = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const addresses = await Address.find({ userId });
+
+    // If no addresses exist, return empty array
+    if (addresses.length === 0) {
+      return res.json({ 
+        message: "No addresses found", 
+        address: [] 
+      });
+    }
+
+    // If exactly one address, make sure it's active
+    if (addresses.length === 1 && !addresses[0].active) {
+      await Address.findByIdAndUpdate(
+        addresses[0]._id, 
+        { active: true },
+        { returnDocument: 'after' }
+      );
+      addresses[0].active = true;
+    }
+
+    res.json({ 
+      message: "got address", 
+      address: addresses 
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error while getting address", err });
+  }
+};
+
+// Set an address as active
+export const setAddressActive = async (req, res) => {
+  try {
+    const { userId, addressId } = req.body;
+
+    // Deactivate all other addresses for this user
+    await Address.updateMany(
+      { userId, _id: { $ne: addressId } },
+      { active: false }
+    );
+
+    // Activate the selected address
+    const address = await Address.findByIdAndUpdate(
+      addressId,
+      { active: true },
+      { returnDocument: 'after' }
+    );
+
+    if (!address) {
+      return res.status(404).json({ message: "Address not found" });
+    }
+
+    res.json({ message: "Address set as active", address });
+  } catch (err) {
+    res.status(500).json({ message: "Error while setting address active", err });
+  }
+};
