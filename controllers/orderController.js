@@ -113,6 +113,35 @@ export const getOrder = async (req, res) => {
   }
 };
 
+// Admin: get all orders
+export const getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find().sort({ createdAt: -1 });
+    res.json({ orders });
+  } catch (err) {
+    console.error("Error getting all orders:", err);
+    res.status(500).json({ message: "Error while fetching orders" });
+  }
+};
+
+// Admin: update order status
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+    const validStatuses = ["Placed", "Processing", "Shipped", "Delivered", "Cancelled"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: `Invalid status. Must be one of: ${validStatuses.join(", ")}` });
+    }
+    const order = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    res.json({ message: "Order status updated", order });
+  } catch (err) {
+    console.error("Error updating order status:", err);
+    res.status(500).json({ message: "Error while updating order status" });
+  }
+};
+
 /// Get all orders for a user
 export const getUserOrders = async (req, res) => {
   try {
